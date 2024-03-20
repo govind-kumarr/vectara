@@ -1,4 +1,5 @@
 import { config } from "dotenv";
+import { VectaraStore } from "@langchain/community/vectorstores/vectara";
 
 config();
 
