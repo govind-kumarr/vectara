@@ -5,8 +5,8 @@ import {
   notionDbLoader,
   notionPageLoader,
   webLoader,
-} from "./loaders";
-import { addDocstoVectara } from "./vectara";
+} from "./loaders.js";
+import { addDocstoVectara } from "./vectara.js";
 config();
 
 const app = express();
