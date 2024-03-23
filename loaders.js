@@ -5,18 +5,19 @@ import { NotionAPILoader } from "langchain/document_loaders/web/notionapi";
 export const webLoader = async (website) => {
   if (!website) return false;
   const loader = new PuppeteerWebBaseLoader(website);
-
-  const docs = await loader.loadAndSplit();
+  const docs = await loader.load();
   return docs;
 };
+
 export const githubLoader = async (repoUrl, branch, recursive) => {
   const loader = new GithubRepoLoader(repoUrl, {
     branch: branch || "main",
     recursive: recursive || false,
     unknown: "warn",
     maxConcurrency: 5,
+    ignoreFiles:['package-lock.json']
   });
-  const docs = await loader.loadAndSplit();
+  const docs = await loader.load();
   return docs;
 };
 
@@ -64,6 +65,6 @@ export const notionPageLoader = async (pageId) => {
     type: "page",
   });
 
-  const pageDocs = await pageLoader.loadAndSplit();
+  const pageDocs = await pageLoader.load();
   return pageDocs;
 };

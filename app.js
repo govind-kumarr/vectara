@@ -17,15 +17,15 @@ app.use(express.json());
 app.post("/load/website", async (req, res) => {
   const { website } = req.body;
   const docs = await webLoader(website);
-  const doc_ids = await addDocstoVectara(docs);
-  res.send({ message: "success", doc_ids });
+  addDocstoVectara(docs);
+  res.send({ message: "started process" });
 });
 
 app.post("/load/github", async (req, res) => {
   const { github_url } = req.body;
   const docs = await githubLoader(github_url);
-  const doc_ids = await addDocstoVectara(docs);
-  res.send({ message: "success", doc_ids });
+  addDocstoVectara(docs);
+  res.send({ message: "started process" });
 });
 
 app.post("/load/notion", async (req, res) => {
@@ -33,18 +33,16 @@ app.post("/load/notion", async (req, res) => {
   const responseArr = [];
   if (pageId) {
     const docs = await notionPageLoader(pageId);
-    const doc_ids = docs ? await addDocstoVectara(docs) : null;
+    const doc_ids = docs ? addDocstoVectara(docs) : null;
     responseArr.push({
-      message: doc_ids ? "Docs added successfully." : "Failure",
-      doc_ids,
+      message: "started process",
     });
   }
   if (dbId) {
     const docs = await notionDbLoader(dbId);
     const doc_ids = docs ? await addDocstoVectara(docs) : null;
     responseArr.push({
-      message: doc_ids ? "Docs added successfully." : "Failure",
-      doc_ids,
+      message: "started process",
     });
   }
   res.send(responseArr);
