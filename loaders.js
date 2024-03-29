@@ -1,11 +1,11 @@
-import { PuppeteerWebBaseLoader } from "langchain/document_loaders/web/puppeteer";
+import { CheerioWebBaseLoader } from "langchain/document_loaders/web/cheerio";
 import { GithubRepoLoader } from "langchain/document_loaders/web/github";
 import { NotionAPILoader } from "langchain/document_loaders/web/notionapi";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 export const webLoader = async (website) => {
   if (!website) return false;
-  const loader = new PuppeteerWebBaseLoader(website);
+  const loader = new CheerioWebBaseLoader(website);
   const splitter = RecursiveCharacterTextSplitter.fromLanguage("html", {
     chunkSize: 1000,
     chunkOverlap: 100,
