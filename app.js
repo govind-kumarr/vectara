@@ -73,7 +73,7 @@ app.post("/load/notion", async (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  console.log(`App is running on port: ${PORT}`);
+  res.send(`App is running on port: ${PORT}`);
 });
 
 app.listen(PORT, () => {
