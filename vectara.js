@@ -1,8 +1,13 @@
 import { config } from "dotenv";
 import { VectaraStore } from "langchain/vectorstores/vectara";
 import { Document } from "@langchain/core/documents";
+import { v4 as uuidV4 } from "uuid";
+import axios from "axios";
 
 config();
+
+const customerId = Number(process.env.VECTARA_CUSTOMER_ID);
+const corpusId = Number(process.env.VECTARA_CORPUS_ID);
 
 export const addDocstoVectara = async (docs) => {
   const startTime = Date.now();
@@ -117,4 +122,71 @@ const test = async () => {
   }
 };
 
-// test();
+export class VectaraAPI_Client {
+  constructor(customerId, corpusId) {
+    this.api_key = process.env.VECTARA_API_KEY;
+    this.customerId = customerId;
+    this.corpusId = corpusId;
+    this.baseUrl = "https://api.vectara.io/v1/index";
+    this.headers = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "x-api-key": this.api_key,
+    };
+  }
+
+  async addDocs(docs) {
+    const customerId = this.customerId;
+    const corpusId = this.corpusId;
+    const data = {
+      customerId,
+      corpusId,
+      document: this.prepareDocs(docs),
+    };
+    const res = await this.callIndexApi(data);
+    return res.data;
+  }
+
+  async callIndexApi(data) {
+    return axios.post(this.baseUrl, data, {
+      headers: this.headers,
+    });
+  }
+
+  prepareDocs(docs) {
+    const documentId = uuidV4();
+    const doc = docs[0];
+    const title = doc.metadata.source;
+    const description = doc.metadata.source;
+    const section = docs.map((doc, index) => this.prepareSection(doc, index));
+    console.log("Sections length: " + section.length);
+    return {
+      documentId,
+      title,
+      description,
+      section,
+    };
+  }
+
+  prepareSection(doc, index) {
+    const id = index;
+    const title = doc.metadata.source;
+    const text = doc.pageContent;
+    const metadataJson = JSON.stringify(doc.metadata);
+    return {
+      id,
+      title,
+      text,
+      metadataJson,
+    };
+  }
+}
+
+// const newVClient = new VectaraAPI_Client(customerId, corpusId);
+// const test2 = async () => {
+//   const docs = await webLoader("https://js.langchain.com/docs/modules/chains/");
+//   const data = await newVClient.addDocs(docs);
+//   console.log(data);
+// };
+
+// test2();

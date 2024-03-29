@@ -6,7 +6,7 @@ import {
   notionPageLoader,
   webLoader,
 } from "./loaders.js";
-import { addDocstoVectara } from "./vectara.js";
+import { VectaraAPI_Client, addDocstoVectara } from "./vectara.js";
 config();
 
 const app = express();
@@ -14,38 +14,62 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
+const customerId = Number(process.env.VECTARA_CUSTOMER_ID);
+const corpusId = Number(process.env.VECTARA_CORPUS_ID);
+
+const vc_client = new VectaraAPI_Client(customerId, corpusId);
+
 app.post("/load/website", async (req, res) => {
-  const { website } = req.body;
-  const docs = await webLoader(website);
-  addDocstoVectara(docs);
-  res.send({ message: "started process" });
+  try {
+    const { website } = req.body;
+    const docs = await webLoader(website);
+    const response = await vc_client.addDocs(docs);
+    console.log(response);
+    res.send({ message: "success" });
+  } catch (error) {
+    console.log(error);
+    res.send({ message: "something went wrong!" });
+  }
 });
 
 app.post("/load/github", async (req, res) => {
-  const { github_url } = req.body;
-  const docs = await githubLoader(github_url);
-  addDocstoVectara(docs);
-  res.send({ message: "started process" });
+  try {
+    const { github_url } = req.body;
+    const docs = await githubLoader(github_url);
+    const response = await vc_client.addDocs(docs);
+    console.log(response);
+    res.send({ message: "success" });
+  } catch (error) {
+    console.log(error);
+    res.send({ message: "something went wrong!" });
+  }
 });
 
 app.post("/load/notion", async (req, res) => {
-  const { pageId, dbId } = req.body;
-  const responseArr = [];
-  if (pageId) {
-    const docs = await notionPageLoader(pageId);
-    const doc_ids = docs ? addDocstoVectara(docs) : null;
-    responseArr.push({
-      message: "started process",
-    });
+  try {
+    const { pageId, dbId } = req.body;
+    const responseArr = [];
+    if (pageId) {
+      const docs = await notionPageLoader(pageId);
+      const res = await vc_client.addDocs(docs);
+      console.log(res);
+      responseArr.push({
+        message: "sucess",
+      });
+    }
+    if (dbId) {
+      const docs = await notionDbLoader(dbId);
+      const res = await vc_client.addDocs(docs);
+      console.log(res);
+      responseArr.push({
+        message: "sucess",
+      });
+    }
+    res.send(responseArr);
+  } catch (error) {
+    console.log(error);
+    res.send({ message: "something went wrong!" });
   }
-  if (dbId) {
-    const docs = await notionDbLoader(dbId);
-    const doc_ids = docs ? await addDocstoVectara(docs) : null;
-    responseArr.push({
-      message: "started process",
-    });
-  }
-  res.send(responseArr);
 });
 
 app.listen(PORT, () => {

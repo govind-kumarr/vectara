@@ -1,11 +1,16 @@
 import { PuppeteerWebBaseLoader } from "langchain/document_loaders/web/puppeteer";
 import { GithubRepoLoader } from "langchain/document_loaders/web/github";
 import { NotionAPILoader } from "langchain/document_loaders/web/notionapi";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 export const webLoader = async (website) => {
   if (!website) return false;
   const loader = new PuppeteerWebBaseLoader(website);
-  const docs = await loader.load();
+  const splitter = RecursiveCharacterTextSplitter.fromLanguage("html", {
+    chunkSize: 1000,
+    chunkOverlap: 100,
+  });
+  const docs = await loader.loadAndSplit(splitter);
   return docs;
 };
 
@@ -15,7 +20,7 @@ export const githubLoader = async (repoUrl, branch, recursive) => {
     recursive: recursive || false,
     unknown: "warn",
     maxConcurrency: 5,
-    ignoreFiles:['package-lock.json']
+    ignoreFiles: ["package-lock.json", "pnpm-lock.yaml"],
   });
   const docs = await loader.load();
   return docs;
