@@ -2,6 +2,8 @@ import { CheerioWebBaseLoader } from "langchain/document_loaders/web/cheerio";
 import { GithubRepoLoader } from "langchain/document_loaders/web/github";
 import { NotionAPILoader } from "langchain/document_loaders/web/notionapi";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { config } from "dotenv";
+config();
 
 export const webLoader = async (website) => {
   if (!website) return false;
@@ -56,6 +58,7 @@ export const notionDbLoader = async (dbId) => {
 };
 
 export const notionPageLoader = async (pageId) => {
+  console.log(notionsIntegrationToken, "tokenid----");
   if (!notionsIntegrationToken)
     return {
       message: "Notion Authentication Failed",

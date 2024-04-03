@@ -15,15 +15,23 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 const customerId = Number(process.env.VECTARA_CUSTOMER_ID);
-const corpusId = Number(process.env.VECTARA_CORPUS_ID);
 
-const vc_client = new VectaraAPI_Client(customerId, corpusId);
+function intializeVectara(corpusId) {
+  const vc_client = new VectaraAPI_Client(customerId, corpusId);
+  return vc_client;
+}
 
 app.post("/load/website", async (req, res) => {
   try {
-    const { website } = req.body;
+    const { website, corpusId, documentTitle, documentId } = req.body;
     const docs = await webLoader(website);
-    const response = await vc_client.addDocs(docs);
+    const vc_client = intializeVectara(corpusId);
+    const response = await vc_client.addDocs(
+      docs,
+      corpusId,
+      documentId,
+      documentTitle
+    );
     console.log(response);
     res.send({ message: "success" });
   } catch (error) {
@@ -34,9 +42,15 @@ app.post("/load/website", async (req, res) => {
 
 app.post("/load/github", async (req, res) => {
   try {
-    const { github_url } = req.body;
+    const { github_url, corpusId, documentTitle, documentId } = req.body;
     const docs = await githubLoader(github_url);
-    const response = await vc_client.addDocs(docs);
+    const vc_client = intializeVectara(corpusId);
+    const response = await vc_client.addDocs(
+      docs,
+      corpusId,
+      documentTitle,
+      documentId
+    );
     console.log(response);
     res.send({ message: "success" });
   } catch (error) {
@@ -47,11 +61,19 @@ app.post("/load/github", async (req, res) => {
 
 app.post("/load/notion", async (req, res) => {
   try {
-    const { pageId, dbId } = req.body;
+    const { pageId, dbId, corpusId, documentTitle, documentId } = req.body;
+    console.log({ pageId, dbId, corpusId, documentTitle, documentId });
     const responseArr = [];
     if (pageId) {
       const docs = await notionPageLoader(pageId);
-      const res = await vc_client.addDocs(docs);
+      console.log(docs, "docs");
+      const vc_client = intializeVectara(corpusId);
+      const res = await vc_client.addDocs(
+        docs,
+        corpusId,
+        documentTitle,
+        documentId
+      );
       console.log(res);
       responseArr.push({
         message: "sucess",

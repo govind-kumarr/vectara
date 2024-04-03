@@ -135,13 +135,12 @@ export class VectaraAPI_Client {
     };
   }
 
-  async addDocs(docs) {
+  async addDocs(docs, corpusId, documentId, documentTitle) {
     const customerId = this.customerId;
-    const corpusId = this.corpusId;
     const data = {
       customerId,
       corpusId,
-      document: this.prepareDocs(docs),
+      document: this.prepareDocs(docs, documentId, documentTitle),
     };
     const res = await this.callIndexApi(data);
     return res.data;
@@ -153,10 +152,10 @@ export class VectaraAPI_Client {
     });
   }
 
-  prepareDocs(docs) {
-    const documentId = uuidV4();
+  prepareDocs(docs, documentId, documentTitle) {
+    documentId = documentId || uuidV4();
     const doc = docs[0];
-    const title = doc.metadata.source;
+    const title = documentTitle || doc.metadata.source;
     const description = doc.metadata.source;
     const section = docs.map((doc, index) => this.prepareSection(doc, index));
     console.log("Sections length: " + section.length);
